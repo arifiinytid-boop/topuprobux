@@ -3,295 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROBUXSTORE - Premium Edition</title>
+    <title>RobuxStore - Top Up Cepat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google API dimuat secara async agar tidak menghambat loading -->
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
-        :root {
-            --primary-gold: #FFB800;
-            --bg-dark: #000000;
-            --card-bg: #1A1A1A;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: white;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
         }
 
-        .navbar {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 12px 16px;
+        .glass-morphism {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .robux-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .robux-card:hover {
+            transform: translateY(-8px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Loading Screen Fix */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #0f172a;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: 250px;
-            transition: transform 0.2s;
-        }
-
-        .robux-amount {
-            font-size: clamp(1.5rem, 5vw, 2.2rem);
-            font-weight: 800;
-            line-height: 1;
-            margin: 5px 0;
-            word-break: break-all;
-        }
-
-        .price-tag {
-            font-size: clamp(1rem, 4.5vw, 1.2rem);
-            font-weight: 700;
-            color: white;
-            margin-bottom: 12px;
-        }
-
-        .btn-yellow {
-            background: #FFB800;
-            color: black;
-            font-weight: 800;
-            border-radius: 12px;
-            padding: 12px 5px;
-            width: 100%;
-            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            font-size: 12px;
-            text-transform: uppercase;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.3s;
+            opacity: 1;
+            transition: opacity 0.4s ease, visibility 0.4s;
         }
 
-        .btn-yellow:disabled {
-            background: #555;
-            color: #aaa;
-            cursor: not-allowed;
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #1e293b;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        .payment-box {
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 110px;
-            height: 55px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .modal {
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .profile-badge {
-            background: #222;
-            padding: 4px 12px 4px 4px;
-            border-radius: 50px;
-            border: 1px solid #FFB800;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .star-active { color: #fbbf24 !important; }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 overflow-x-hidden">
 
-    <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+    <!-- Loading Screen (Sekarang lebih responsif) -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p class="mt-4 text-blue-400 font-bold tracking-widest animate-pulse">MEMUAT...</p>
+    </div>
+
+    <!-- Audio Efek -->
+    <audio id="click-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <img src="webs.png" class="h-8 w-8 rounded" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg'; this.style.filter='invert(1)'">
-                <span class="text-lg font-black tracking-tighter">ROBUX<span class="text-yellow-500">STORE</span></span>
+    <nav class="glass-morphism sticky top-0 z-50 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <img src="webs.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg'" class="w-8 h-8 rounded-lg" alt="Logo">
+            <span class="text-xl font-bold text-white">RobuxStore</span>
+        </div>
+        
+        <div id="auth-section">
+            <div id="g_id_onload"
+                 data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com"
+                 data-callback="onGoogleLogin"
+                 data-auto_prompt="false">
             </div>
-            
-            <div id="auth-wrapper" class="flex items-center gap-2">
-                <div id="g_id_onload"
-                     data-client_id="755256437774-ngi39fqk1o2inbvjneh1s67c39jm4ur9.apps.googleusercontent.com"
-                     data-callback="onSignIn"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="medium" data-logo_alignment="left"></div>
-            </div>
+            <div class="g_id_signin" data-type="icon" data-shape="circle" data-theme="filled_blue"></div>
+        </div>
 
-            <div id="user-info" class="hidden flex items-center gap-2">
-                <div class="profile-badge flex items-center gap-2">
-                    <img id="u-img" class="h-8 w-8 rounded-full">
-                    <div class="flex flex-col">
-                        <span id="u-name" class="text-[10px] font-bold leading-tight"></span>
-                        <span id="u-email" class="text-[8px] text-zinc-400 leading-tight"></span>
-                    </div>
-                </div>
-            </div>
+        <div id="user-info" class="hidden flex items-center gap-2">
+            <img id="u-img" class="w-9 h-9 rounded-full border-2 border-blue-500" src="" alt="User">
+            <button onclick="location.reload()" class="text-[10px] bg-red-500/20 text-red-400 p-1 rounded">Logout</button>
         </div>
     </nav>
 
-    <!-- Header -->
-    <header class="text-center py-8 px-4">
-        <p id="status-msg" class="text-red-500 text-[10px] font-bold uppercase mb-2">Silahkan Login Untuk Membeli</p>
-        <p class="text-zinc-500 text-xs">Aman, Legal, & Terpercaya 24/7.</p>
+    <!-- Header & Jam -->
+    <header class="text-center py-10 px-4">
+        <div class="mb-4 inline-block bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+            <p id="jam" class="text-4xl font-mono font-bold text-blue-400">00:00:00</p>
+            <p id="tgl" class="text-xs text-slate-400 uppercase tracking-widest"></p>
+        </div>
+        <h1 class="text-3xl font-bold">Pilih Paket Robux</h1>
+        <p class="text-slate-400 text-sm mt-2">Top up aman dengan proses WhatsApp langsung.</p>
     </header>
 
-    <!-- Grid Paket -->
-    <div class="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 pb-12" id="packet-grid"></div>
-
-    <!-- Metode Pembayaran -->
-    <section class="text-center py-10 bg-zinc-950">
-        <h3 class="text-zinc-600 font-bold text-xs tracking-widest uppercase mb-6">Metode Pembayaran</h3>
-        <div class="flex flex-wrap justify-center gap-4 px-4">
-            <div class="payment-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg" alt="DANA">
-            </div>
-            <div class="payment-box" style="background: #4D2A86;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg" alt="OVO" style="filter: brightness(0) invert(1);">
-            </div>
-            <div class="payment-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA">
-            </div>
+    <!-- Paket Robux -->
+    <div class="container mx-auto px-4 pb-20">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="list-paket">
+            <!-- Paket akan dibuat otomatis oleh JS -->
         </div>
-    </section>
 
-    <!-- Modal Konfirmasi & Usia -->
-    <div id="buy-modal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-6 modal">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-sm text-center">
-            <h2 class="text-xl font-bold mb-2">Konfirmasi Pembelian</h2>
-            <p id="modal-desc" class="text-zinc-400 text-sm mb-6"></p>
-            
-            <div class="mb-6">
-                <label class="block text-xs text-zinc-500 mb-2 uppercase font-bold">Verifikasi Usia Anda</label>
-                <input type="number" id="user-age" placeholder="Masukkan Usia" class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-center focus:outline-none focus:border-yellow-500">
-            </div>
+        <!-- Pembayaran -->
+        <div class="mt-12 p-6 glass-morphism rounded-2xl flex justify-center items-center gap-6 grayscale opacity-60">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg" class="h-6" alt="DANA">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg" class="h-6" alt="OVO">
+        </div>
 
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 bg-zinc-800 py-3 rounded-xl font-bold text-sm">BATAL</button>
-                <button onclick="validateAndBuy()" class="flex-1 bg-yellow-500 text-black py-3 rounded-xl font-bold text-sm">KONFIRMASI</button>
+        <!-- Rating -->
+        <div class="mt-10 max-w-md mx-auto p-6 glass-morphism rounded-2xl text-center">
+            <h4 class="font-bold mb-4">Rating Layanan</h4>
+            <div id="rating-ui" class="flex justify-center gap-2 text-2xl text-slate-600">
+                <i class="fas fa-star cursor-pointer hover:text-yellow-400" onclick="handleRate(1)"></i>
+                <i class="fas fa-star cursor-pointer hover:text-yellow-400" onclick="handleRate(2)"></i>
+                <i class="fas fa-star cursor-pointer hover:text-yellow-400" onclick="handleRate(3)"></i>
+                <i class="fas fa-star cursor-pointer hover:text-yellow-400" onclick="handleRate(4)"></i>
+                <i class="fas fa-star cursor-pointer hover:text-yellow-400" onclick="handleRate(5)"></i>
             </div>
+            <p id="rate-msg" class="text-[10px] mt-2 text-slate-500 italic">Login untuk memberi rating</p>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="py-10 text-center px-4 border-t border-zinc-900">
-        <p class="text-zinc-500 text-xs mb-2">© 2026 <span class="text-yellow-500 font-bold">RobuxStore</span>. All Rights Reserved.</p>
+    <footer class="py-8 text-center text-slate-600 text-xs border-t border-slate-800">
+        &copy; 2026 RobuxStore - Powered by Netfily App
     </footer>
 
     <script>
-        let isLoggedIn = false;
-        let selectedItem = null;
-
-        const data = [
-            { r: 40, p: "7.000" },
-            { r: 80, p: "13.000" },
-            { r: 160, p: "25.000" },
-            { r: 220, p: "35.000" },
-            { r: 400, p: "65.000" },
-            { r: 800, p: "120.000" },
-            { r: 1700, p: "250.000" },
-            { r: 4500, p: "650.000" },
-            { r: 10000, p: "1.400.000" },
-            { r: 22500, p: "3.100.000" },
-            { r: 50000, p: "6.800.000" }
+        // Data paket
+        const daftarPaket = [
+            { r: 40, h: "Rp 8.000" }, { r: 80, h: "Rp 15.000" },
+            { r: 160, h: "Rp 30.000" }, { r: 220, h: "Rp 42.000" },
+            { r: 400, h: "Rp 75.000" }, { r: 800, h: "Rp 145.000" },
+            { r: 1700, h: "Rp 290.000" }, { r: 4500, h: "Rp 750.000" },
+            { r: 10000, h: "Rp 1.500.000" }, { r: 22500, h: "Rp 3.200.000" },
+            { r: 50000, h: "Rp 7.000.000" }, { r: 150000, h: "Rp 20.000.000" }
         ];
 
-        const grid = document.getElementById('packet-grid');
-        const sfx = document.getElementById('clickSound');
+        let isLoggedIn = false;
 
-        function renderGrid() {
-            grid.innerHTML = '';
-            data.forEach((item, i) => {
-                const card = document.createElement('div');
-                card.className = "robux-card fade-in";
-                card.style.animationDelay = `${i * 0.05}s`;
-                card.innerHTML = `
-                    <div>
-                        <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter mb-1">R$</div>
-                        <div class="robux-amount">${item.r}</div>
-                        <div class="text-yellow-500 text-xs font-bold mb-4">Robux</div>
-                    </div>
-                    <div>
-                        <div class="price-tag">Rp ${item.p}</div>
-                        <button onclick="openBuyModal(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
-                                class="btn-yellow" ${!isLoggedIn ? 'disabled' : ''}>
-                            <i class="fab fa-whatsapp"></i> BELI SEKARANG
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+        // Render Paket
+        const container = document.getElementById('list-paket');
+        daftarPaket.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'robux-card glass-morphism p-5 rounded-xl text-center flex flex-col items-center';
+            el.innerHTML = `
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Robux_2019_Logo_gold.svg/1024px-Robux_2019_Logo_gold.svg.png" class="w-10 h-10 mb-2">
+                <div class="font-bold text-lg">${p.r.toLocaleString()} R$</div>
+                <div class="text-blue-400 text-xs mb-4">${p.h}</div>
+                <button onclick="order(${p.r}, '${p.h}')" class="bg-blue-600 w-full py-2 rounded-lg text-xs font-bold hover:bg-blue-500 transition">BELI</button>
+            `;
+            container.appendChild(el);
+        });
+
+        // WhatsApp Order
+        function order(r, h) {
+            playSound();
+            const wa = `https://wa.me/6282220960848?text=Saya%20Ingin%20Membeli%20Robux%20Sebanyak%20*${r}*%20dengan%20harga%20*${h}*%20Mohon Di Proses Segera Yaa`;
+            window.open(wa, '_blank');
         }
 
-        function openBuyModal(item) {
-            sfx.play();
-            selectedItem = item;
-            document.getElementById('modal-desc').innerText = `Apakah anda yakin ingin membeli ${item.r} Robux seharga Rp ${item.p}?`;
-            document.getElementById('buy-modal').classList.remove('hidden');
+        // Sound
+        function playSound() {
+            const s = document.getElementById('click-sound');
+            s.currentTime = 0;
+            s.play().catch(() => {});
         }
 
-        function closeModal() {
-            document.getElementById('buy-modal').classList.add('hidden');
-            document.getElementById('user-age').value = '';
-        }
-
-        function validateAndBuy() {
-            const age = document.getElementById('user-age').value;
-            if (!age || age < 1) {
-                alert("Silahkan masukkan usia yang valid!");
-                return;
-            }
-            if (age < 9) {
-                alert("Maaf, usia di bawah 9 tahun tidak diizinkan melakukan transaksi.");
-                closeModal();
-                return;
-            }
-
-            const msg = `Halo Admin, Saya [${document.getElementById('u-name').innerText}] Ingin Membeli Robux Sebanyak ${selectedItem.r} dengan harga Rp ${selectedItem.p}. Usia saya ${age} tahun.`;
-            window.open(`https://wa.me/6282220960848?text=${encodeURIComponent(msg)}`, '_blank');
-            closeModal();
-        }
-
-        function onSignIn(googleUser) {
-            const base64Url = googleUser.credential.split('.')[1];
+        // Google Login
+        function onGoogleLogin(response) {
+            const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const user = JSON.parse(window.atob(base64));
+            const data = JSON.parse(window.atob(base64));
+            
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('u-img').src = data.picture;
             
             isLoggedIn = true;
-            document.getElementById('auth-wrapper').classList.add('hidden');
-            document.getElementById('user-info').classList.remove('hidden');
-            document.getElementById('u-img').src = user.picture;
-            document.getElementById('u-name').innerText = user.name;
-            document.getElementById('u-email').innerText = user.email;
-            
-            document.getElementById('status-msg').innerText = "Akun Terverifikasi - Siap Belanja";
-            document.getElementById('status-msg').className = "text-green-500 text-[10px] font-bold uppercase mb-2";
-            
-            renderGrid();
+            document.getElementById('rate-msg').innerText = "Silakan pilih bintang untuk menilai";
         }
 
-        // Jalankan render pertama kali
-        renderGrid();
+        // Rating
+        function handleRate(v) {
+            if(!isLoggedIn) {
+                alert("Silakan Login dengan Google terlebih dahulu untuk memberikan rating!");
+                return;
+            }
+            playSound();
+            const stars = document.querySelectorAll('#rating-ui i');
+            stars.forEach((s, i) => {
+                s.className = i < v ? 'fas fa-star text-yellow-400' : 'far fa-star text-slate-600';
+            });
+            document.getElementById('rate-msg').innerText = "Terima kasih! Rating Anda telah disimpan hari ini.";
+        }
+
+        // Jam & Tanggal
+        function updateTime() {
+            const now = new Date();
+            const ops = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('jam').innerText = now.toLocaleTimeString('id-ID');
+            document.getElementById('tgl').innerText = now.toLocaleDateString('id-ID', ops);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Control Loading Screen
+        window.addEventListener('load', () => {
+            // Sembunyikan loading segera setelah aset utama siap
+            hideLoading();
+        });
+
+        // Backup timer jika loading macet (max 2 detik)
+        setTimeout(hideLoading, 2000);
+
+        function hideLoading() {
+            const screen = document.getElementById('loading-screen');
+            if (screen.style.visibility !== 'hidden') {
+                screen.style.opacity = '0';
+                setTimeout(() => {
+                    screen.style.visibility = 'hidden';
+                }, 400);
+            }
+        }
     </script>
 </body>
 </html>
